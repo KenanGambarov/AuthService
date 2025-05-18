@@ -1,0 +1,63 @@
+version: '3.1'
+services:
+  auth-service:
+    image: authservices:1.0
+    hostname: ms.auth
+    depends_on:
+      - auth_db
+      - redis
+    ports:
+      - "8086:8086"
+#    First we need create network for feign client
+#    docker network create ms-services
+    networks:
+      - ms-services
+    volumes:
+      - ./logs/auth-service:/opt/app/logs/auth-service
+    environment:
+      DB_CONNECTION_IP: auth_db
+      DB_CONNECTION_PORT: 5432
+      DB_NAME: auth_service
+      DB_CONNECTION_USERNAME: admin
+      DB_CONNECTION_PASSWORD: 123456
+  auth_db:
+    hostname: postgresql
+    image: postgres:15
+    networks:
+      - ms-services
+    restart: always
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: auth_service
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5438:5438"
+  redis:
+    image: redis:latest
+    container_name: redis_auth
+    volumes:
+      - redis_data:/data
+    networks:
+      - ms-services
+    ports:
+      - "6385:6385"
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.11.1
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs/auth-service:/opt/app/logs/auth-service
+    networks:
+      - ms-services
+networks:
+  ms-services:
+    external: true
+    driver: bridge
+volumes:
+  auth_db_data:
+    driver: local
+  redis_data:
+    driver: local
+  elasticsearch_data:
