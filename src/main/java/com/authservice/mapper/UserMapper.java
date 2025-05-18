@@ -1,6 +1,5 @@
 package com.authservice.mapper;
 
-import co.elastic.clients.elasticsearch.security.User;
 import com.authservice.dto.request.UserRequest;
 import com.authservice.dto.response.UserResponse;
 import com.authservice.entity.RoleEntity;
@@ -18,6 +17,7 @@ public class UserMapper {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .phone(request.getPhone())
+                .address(request.getAddress())
                 .roles(Set.of(role))
                 .build();
     }

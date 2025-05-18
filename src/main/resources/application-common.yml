@@ -10,7 +10,7 @@ resilience4j:
         ignore-exceptions:
           - com.authservice.exception.NotFoundException
 jwt:
-  secret-key: 'YXV0U2VydmljZVNlY3JldEtleTpLQG5AbjE5ODk='
+  secret-key: 'YXV0U2VydmljZVNlY3JldEtleTpLQG5AbjE5ODkqISY='
   access-expiration: 600000      # 10 dəqiqə
   refresh-expiration: 604800000  # 7 gün
 logging:
