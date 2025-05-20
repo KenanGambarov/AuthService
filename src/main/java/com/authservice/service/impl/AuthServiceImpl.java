@@ -76,6 +76,7 @@ public class AuthServiceImpl implements AuthService {
             UserEntity userEntity = userDetailsService.loadUserByUsername(request.getUsername());
 
             var roles = userEntity.getRoles().stream().map(RoleEntity::getName).toList();
+            System.out.println("roles " + roles);
             UserPrincipal userPrincipal = new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),roles);
 
             String accessToken = jwtService.generateToken(userPrincipal);

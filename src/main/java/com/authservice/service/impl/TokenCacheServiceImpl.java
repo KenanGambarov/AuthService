@@ -53,8 +53,8 @@ public class TokenCacheServiceImpl implements TokenCacheService {
     }
 
     @Override
-    @CircuitBreaker(name = "redisBreaker", fallbackMethod = "fallbackClearAllValidTokenCache")
-    @Retry(name = "redisRetry", fallbackMethod = "fallbackClearAllValidTokenCache")
+    @CircuitBreaker(name = "redisBreaker", fallbackMethod = "fallbackClearUserValidTokenCache")
+    @Retry(name = "redisRetry", fallbackMethod = "fallbackClearUserValidTokenCache")
     public void clearUserValidTokenCache(Long userId) {
         cacheUtil.deleteFromCache(CacheConstraints.ALL_TOKEN_KEY.getKey(userId));
         log.debug("Cache cleared for userId {}",  userId);

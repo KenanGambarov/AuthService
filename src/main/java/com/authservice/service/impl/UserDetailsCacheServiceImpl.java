@@ -32,7 +32,7 @@ public class UserDetailsCacheServiceImpl implements UserDetailsCacheService {
         return Optional.ofNullable(user);
     }
 
-    public Optional<UserEntity> fallbackUserCache(Long username, Throwable t) {
+    public Optional<UserEntity> fallbackUserCache(String username, Throwable t) {
         log.error("Redis not available for username {}, falling back to DB. Error: {}",username, t.getMessage());
         return  Optional.empty();
     }
