@@ -10,11 +10,11 @@ import java.util.Optional;
 
 public interface TokenCacheService {
 
-    Optional<List<TokenEntity>> getAllValidTokenFromCacheOrDB(Long id);
+    Optional<TokenEntity> getUserValidTokenFromCacheOrDB(Long id);
 
     Optional<TokenEntity> getTokenFromCacheOrDB(String token);
 
-    void clearAllValidTokenCache(Long id);
+    void clearUserValidTokenCache(Long id);
 
     void clearTokenCache(String token);
 

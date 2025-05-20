@@ -4,6 +4,7 @@ import com.authservice.dto.request.UserRequest;
 import com.authservice.dto.response.UserResponse;
 import com.authservice.entity.RoleEntity;
 import com.authservice.entity.UserEntity;
+import com.authservice.security.UserPrincipal;
 
 import java.util.Set;
 
@@ -25,7 +26,6 @@ public class UserMapper {
     public static UserResponse toResponse(UserEntity entity) {
         return UserResponse.builder()
                 .username(entity.getUsername())
-                .password(entity.getPassword())
                 .firstName(entity.getFirstName())
                 .lastName(entity.getLastName())
                 .email(entity.getEmail())
@@ -33,15 +33,10 @@ public class UserMapper {
                 .build();
     }
 
-    public static UserEntity toEntity(UserResponse response) {
-        return UserEntity.builder()
-                .username(response.getUsername())
-                .password(response.getPassword())
-                .firstName(response.getFirstName())
-                .lastName(response.getLastName())
-                .email(response.getEmail())
-                .phone(response.getPhone())
-                .build();
+    public static UserPrincipal toUserPrincipal(UserEntity userEntity) {
+        var roles = userEntity.getRoles().stream().map(RoleEntity::getName).toList();
+        return new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),roles);
     }
+
 
 }

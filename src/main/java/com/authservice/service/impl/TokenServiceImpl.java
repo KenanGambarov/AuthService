@@ -1,7 +1,7 @@
 package com.authservice.service.impl;
 
 import com.authservice.dto.response.TokenResponse;
-import com.authservice.dto.response.UserResponse;
+import com.authservice.entity.RoleEntity;
 import com.authservice.entity.TokenEntity;
 import com.authservice.exception.ExceptionConstants;
 import com.authservice.exception.UnAuthorizedException;
@@ -15,9 +15,6 @@ import com.authservice.service.UserDetailsService;
 import com.authservice.util.JwtUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -45,9 +42,10 @@ public class TokenServiceImpl implements TokenService {
         String username = jwtService.extractUsername(refreshToken).orElseThrow(() ->
                 new UnAuthorizedException(ExceptionConstants.INVALID_TOKEN.getMessage()));
 
-        UserResponse userResponse = userDetailsService.loadUserByUsername(username);
+        var userEntity = userDetailsService.loadUserByUsername(username);
+        var roles = userEntity.getRoles().stream().map(RoleEntity::getName).toList();
 
-        UserPrincipal user = new UserPrincipal(userResponse.getUsername(),userResponse.getPassword());
+        UserPrincipal user = new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),roles);
 
         if (!jwtService.isTokenValid(refreshToken, user)) {
             throw new UnAuthorizedException(ExceptionConstants.INVALID_TOKEN.getMessage());
@@ -64,9 +62,9 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public List<TokenEntity> getAllValidToken(Long userId) {
-        return tokenCacheService.getAllValidTokenFromCacheOrDB(userId)
-                .orElse(new ArrayList<>());
+    public TokenEntity getUserValidToken(Long userId) {
+        return tokenCacheService.getUserValidTokenFromCacheOrDB(userId)
+                .orElse(new TokenEntity());
     }
 
     @Override
@@ -76,13 +74,8 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public void saveAllToken(List<TokenEntity> token) {
-        tokenRepository.saveAll(token);
-    }
-
-    @Override
-    public void clearAllValidTokenCache(Long userId) {
-        tokenCacheService.clearAllValidTokenCache(userId);
+    public void clearUserValidTokenCache(Long userId) {
+        tokenCacheService.clearUserValidTokenCache(userId);
     }
 
     private TokenEntity getTokenOrThrow(String refreshToken){

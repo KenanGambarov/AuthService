@@ -6,6 +6,7 @@ import com.authservice.exception.ExceptionConstants;
 import com.authservice.exception.NotFoundException;
 import com.authservice.mapper.UserMapper;
 import com.authservice.repository.UserRepository;
+import com.authservice.security.UserPrincipal;
 import com.authservice.service.UserDetailsCacheService;
 import com.authservice.service.UserDetailsService;
 import lombok.AllArgsConstructor;
@@ -19,15 +20,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserResponse loadUserByUsername(String username) {
-        UserEntity user = cacheService.getUserFromCacheOrDB(username)
+    public UserEntity loadUserByUsername(String username) {
+        return cacheService.getUserFromCacheOrDB(username)
                 .orElseThrow(() -> new NotFoundException(ExceptionConstants.USER_NOT_FOUND.getMessage()));
-        return UserMapper.toResponse(user);
     }
 
     @Override
+    public UserPrincipal getUserForPrincipal(String username) {
+        var userEntity = cacheService.getUserFromCacheOrDB(username)
+                .orElseThrow(() -> new NotFoundException(ExceptionConstants.USER_NOT_FOUND.getMessage()));
+        return UserMapper.toUserPrincipal(userEntity);
+    }
+
+
+    @Override
     public void saveUserDetails(UserEntity user) {
-        userRepository.save(user);
+         userRepository.save(user);
     }
 
 

@@ -6,7 +6,7 @@ import com.authservice.dto.request.LoginRequest;
 import com.authservice.dto.request.UserRequest;
 import com.authservice.dto.response.AuthResponse;
 import com.authservice.dto.response.TokenResponse;
-import com.authservice.dto.response.UserResponse;
+import com.authservice.entity.RoleEntity;
 import com.authservice.entity.TokenEntity;
 import com.authservice.entity.UserEntity;
 import com.authservice.exception.*;
@@ -26,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 @Service
 @AllArgsConstructor
@@ -51,13 +52,12 @@ public class AuthServiceImpl implements AuthService {
                         .getMessagePattern(RoleName.USER)));
 
         var user =  UserMapper.toEntity(request,passwordEncoder.encode(request.getPassword()),role);
-
         userDetailsService.saveUserDetails(user);
 
-        var jwtToken = jwtService.generateToken(new UserPrincipal(request.getUsername(),request.getPassword()));
-        var refreshToken = jwtService.generateRefreshToken(new UserPrincipal(request.getUsername(),request.getPassword()));
+        var jwtToken = jwtService.generateToken(new UserPrincipal(request.getUsername(),request.getPassword(), List.of(role.getName())));
+        var refreshToken = jwtService.generateRefreshToken(new UserPrincipal(request.getUsername(),request.getPassword(),List.of(role.getName())));
 
-        saveUserToken(user, jwtToken);
+        saveUserToken(user, refreshToken);
 
         return AuthMapper.toAuthResponse(jwtToken,refreshToken);
     }
@@ -73,12 +73,16 @@ public class AuthServiceImpl implements AuthService {
                     )
             );
 
-            UserResponse user = userDetailsService.loadUserByUsername(request.getUsername());
-            UserPrincipal userPrincipal = new UserPrincipal(user.getUsername(),user.getPassword());
+            UserEntity userEntity = userDetailsService.loadUserByUsername(request.getUsername());
+
+            var roles = userEntity.getRoles().stream().map(RoleEntity::getName).toList();
+            UserPrincipal userPrincipal = new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),roles);
 
             String accessToken = jwtService.generateToken(userPrincipal);
             String refreshToken = jwtService.generateRefreshToken(userPrincipal);
 
+            invalidateUserToken(userEntity.getId(), userEntity.getUsername());
+            saveUserToken(userEntity,refreshToken);
             return TokenMapper.toDto(accessToken,refreshToken);
 
         } catch (BadCredentialsException ex) {
@@ -93,25 +97,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void logout(UserPrincipal user) {
-
-        UserEntity userEntity = findUser(user.getUsername());
-
-        List<TokenEntity> validTokens = tokenService.getAllValidToken(userEntity.getId());
-        if (!validTokens.isEmpty()) {
-            validTokens.forEach(token -> {
-                token.setRevoked(true);
-                token.setExpired(true);
-            });
-            tokenService.saveAllToken(validTokens);
-            userDetailsService.clearUserCache(user.getUsername());
-            tokenService.clearAllValidTokenCache(userEntity.getId());
-        }
+        UserEntity userEntity = userDetailsService.loadUserByUsername(user.getUsername());
+        invalidateUserToken(userEntity.getId(), user.getUsername());
     }
 
     @Override
     @Transactional
     public void changePassword(UserPrincipal user, ChangePasswordRequest request) {
-        UserEntity userEntity = findUser(user.getUsername());
+        UserEntity userEntity = userDetailsService.loadUserByUsername(user.getUsername());
 
         if (!passwordEncoder.matches(request.getOldPassword(), userEntity.getPassword())) {
             throw new BadRequestException(ExceptionConstants.WRONG_PASSWORD.getMessage());
@@ -119,19 +112,18 @@ public class AuthServiceImpl implements AuthService {
 
         userEntity.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userDetailsService.saveUserDetails(userEntity);
-
-        List<TokenEntity> validTokens =  tokenService.getAllValidToken(userEntity.getId());
-        validTokens.forEach(token -> {
-            token.setRevoked(true);
-            token.setExpired(true);
-        });
-        tokenService.saveAllToken(validTokens);
-        userDetailsService.clearUserCache(user.getUsername());
-        tokenService.clearAllValidTokenCache(userEntity.getId());
+        invalidateUserToken(userEntity.getId(), user.getUsername());
     }
 
-    private UserEntity findUser(String username){
-        return UserMapper.toEntity(userDetailsService.loadUserByUsername(username));
+    private void invalidateUserToken(Long userId, String username){
+        TokenEntity token =  tokenService.getUserValidToken(userId);
+        if (token!=null) {
+            token.setRevoked(true);
+            token.setExpired(true);
+            tokenService.saveUserToken(token);
+            userDetailsService.clearUserCache(username);
+            tokenService.clearUserValidTokenCache(userId);
+        }
     }
 
 }

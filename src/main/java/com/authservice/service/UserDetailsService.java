@@ -2,10 +2,13 @@ package com.authservice.service;
 
 import com.authservice.dto.response.UserResponse;
 import com.authservice.entity.UserEntity;
+import com.authservice.security.UserPrincipal;
 
 public interface UserDetailsService {
 
-    UserResponse loadUserByUsername(String username);
+    UserEntity loadUserByUsername(String username);
+
+    UserPrincipal getUserForPrincipal(String username);
 
     void saveUserDetails(UserEntity user);
 

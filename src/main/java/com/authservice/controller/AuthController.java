@@ -6,6 +6,7 @@ import com.authservice.dto.request.UserRequest;
 import com.authservice.dto.response.AuthResponse;
 import com.authservice.dto.response.TokenResponse;
 import com.authservice.dto.response.UserResponse;
+import com.authservice.mapper.UserMapper;
 import com.authservice.security.UserPrincipal;
 import com.authservice.service.AuthService;
 import com.authservice.service.TokenService;
@@ -60,7 +61,7 @@ public class AuthController {
     @GetMapping("/me")
     public UserResponse getProfile(Authentication authentication) {
         UserPrincipal user = (UserPrincipal) authentication.getPrincipal();
-        return userDetailsService.loadUserByUsername(user.getUsername());
+        return UserMapper.toResponse(userDetailsService.loadUserByUsername(user.getUsername()));
     }
 
 }

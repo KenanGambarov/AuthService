@@ -1,6 +1,5 @@
 package com.authservice.security;
 
-import com.authservice.dto.response.UserResponse;
 import com.authservice.exception.ExceptionConstants;
 import com.authservice.service.UserDetailsService;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +23,7 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();
         String rawPassword = authentication.getCredentials().toString();
-
-        UserResponse userResponse = userDetailsService.loadUserByUsername(username);
-
-        UserDetails userDetails = new UserPrincipal(userResponse.getUsername(),userResponse.getPassword());
+        UserDetails userDetails = userDetailsService.getUserForPrincipal(username);
 
         if (!passwordEncoder.matches(rawPassword, userDetails.getPassword())) {
             throw new BadCredentialsException(ExceptionConstants.BAD_CREDENTIALS.getMessage());

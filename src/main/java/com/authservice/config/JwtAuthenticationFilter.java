@@ -26,6 +26,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+
+    
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -45,8 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .orElseThrow(() -> new NotFoundException(ExceptionConstants.USER_NOT_FOUND.getMessage()));
 
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserResponse userResponse = userDetailsService.loadUserByUsername(username);
-            UserPrincipal user = new UserPrincipal(userResponse.getUsername(),userResponse.getPassword());
+            UserPrincipal user = userDetailsService.getUserForPrincipal(username);
 
             if (jwtService.isTokenValid(jwt, user)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

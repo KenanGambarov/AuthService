@@ -42,7 +42,7 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public String generateToken(UserPrincipal user) {
         return TokenMapper.toJwt(user, new Date(),
-                Date.from(Instant.now().plus(24, ChronoUnit.HOURS)),getSignKey(), SignatureAlgorithm.HS256);
+                Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)),getSignKey(), SignatureAlgorithm.HS256);
     }
 
     @Override

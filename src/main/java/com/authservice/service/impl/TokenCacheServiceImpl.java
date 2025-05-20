@@ -1,9 +1,6 @@
 package com.authservice.service.impl;
 
 import com.authservice.entity.TokenEntity;
-import com.authservice.entity.UserEntity;
-import com.authservice.exception.ExceptionConstants;
-import com.authservice.exception.UnAuthorizedException;
 import com.authservice.repository.TokenRepository;
 import com.authservice.service.TokenCacheService;
 import com.authservice.util.CacheUtil;
@@ -15,7 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -29,14 +25,14 @@ public class TokenCacheServiceImpl implements TokenCacheService {
     @Override
     @CircuitBreaker(name = "redisBreaker", fallbackMethod = "fallbackAllValidTokenCache")
     @Retry(name = "redisRetry", fallbackMethod = "fallbackAllValidTokenCache")
-    public Optional<List<TokenEntity>> getAllValidTokenFromCacheOrDB(Long userId) {
-        List<TokenEntity> tokens = cacheUtil.getOrLoad(CacheConstraints.ALL_TOKEN_KEY.getKey(userId),
-                () -> tokenRepository.findAllValidTokenByUser(userId).orElse(null),
+    public Optional<TokenEntity> getUserValidTokenFromCacheOrDB(Long userId) {
+        TokenEntity tokens = cacheUtil.getOrLoad(CacheConstraints.ALL_TOKEN_KEY.getKey(userId),
+                () -> tokenRepository.findValidTokenByUser(userId).orElse(null),
                 CacheDurationConstraints.WEEK.toDuration());
         return Optional.ofNullable(tokens);
     }
 
-    public Optional<List<TokenEntity>> fallbackAllValidTokenCache(Long userId, Throwable t) {
+    public Optional<TokenEntity> fallbackAllValidTokenCache(Long userId, Throwable t) {
         log.error("Redis not available for userId {}, falling back to DB. Error: {}",userId, t.getMessage());
         return  Optional.empty();
     }
@@ -48,8 +44,6 @@ public class TokenCacheServiceImpl implements TokenCacheService {
         TokenEntity tokenEntity = cacheUtil.getOrLoad(CacheConstraints.TOKEN_KEY.getKey(token),
                 () -> tokenRepository.findByToken(token).orElse(null),
                 CacheDurationConstraints.WEEK.toDuration());
-//        TokenEntity refreshTokenEntity = tokenRepository.findByToken(refreshToken)
-//                .orElseThrow(() -> new UnAuthorizedException(ExceptionConstants.INVALID_TOKEN.getMessage()));
         return Optional.ofNullable(tokenEntity);
     }
 
@@ -61,12 +55,12 @@ public class TokenCacheServiceImpl implements TokenCacheService {
     @Override
     @CircuitBreaker(name = "redisBreaker", fallbackMethod = "fallbackClearAllValidTokenCache")
     @Retry(name = "redisRetry", fallbackMethod = "fallbackClearAllValidTokenCache")
-    public void clearAllValidTokenCache(Long userId) {
+    public void clearUserValidTokenCache(Long userId) {
         cacheUtil.deleteFromCache(CacheConstraints.ALL_TOKEN_KEY.getKey(userId));
         log.debug("Cache cleared for userId {}",  userId);
     }
 
-    public void fallbackClearAllValidTokenCache(Long userId, Throwable t) {
+    public void fallbackClearUserValidTokenCache(Long userId, Throwable t) {
         log.warn("Redis not available to clear cache for userId {}, ignoring. Error: {}", userId, t.getMessage());
     }
 

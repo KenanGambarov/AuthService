@@ -6,9 +6,11 @@ import com.authservice.entity.UserEntity;
 import com.authservice.security.UserPrincipal;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 public class TokenMapper {
 
@@ -26,6 +28,11 @@ public class TokenMapper {
                 .setSubject(user.getUsername())
                 .setIssuedAt(isuedDate)
                 .setExpiration(expDdate)
+                .claim("userName", user.getUsername())
+                .claim("roles", user.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList()))
+                .claim("iss", "auth-service")
                 .signWith(signKey, algorithm)
                 .compact();
     }
