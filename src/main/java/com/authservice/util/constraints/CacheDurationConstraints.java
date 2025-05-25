@@ -8,8 +8,8 @@ public enum CacheDurationConstraints {
     MINUTE(1L,ChronoUnit.MINUTES),
     HOUR(1L, ChronoUnit.HOURS),
     DAY(1L, ChronoUnit.DAYS),
-    WEEK(1L, ChronoUnit.WEEKS),
-    MONTH(1L, ChronoUnit.MONTHS);
+    WEEK(7L, ChronoUnit.DAYS),
+    MONTH(30L, ChronoUnit.DAYS);
 
     private final Long duration;
     private final TemporalUnit unit;

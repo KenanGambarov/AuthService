@@ -21,8 +21,10 @@ public class UserAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        System.out.println("authenticate");
         String username = authentication.getName();
         String rawPassword = authentication.getCredentials().toString();
+        System.out.println("authenticate username "+ username);
         UserDetails userDetails = userDetailsService.getUserForPrincipal(username);
 
         if (!passwordEncoder.matches(rawPassword, userDetails.getPassword())) {

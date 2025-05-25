@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
 
+import java.io.Serializable;
+
 @Data
 @Entity
 @Builder
@@ -14,7 +16,7 @@ import lombok.experimental.FieldNameConstants;
 @AllArgsConstructor
 @FieldNameConstants
 @Table(name="tokens")
-public class TokenEntity {
+public class TokenEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -64,7 +64,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public TokenEntity getUserValidToken(Long userId) {
         return tokenCacheService.getUserValidTokenFromCacheOrDB(userId)
-                .orElse(new TokenEntity());
+                .orElse(null);
     }
 
     @Override

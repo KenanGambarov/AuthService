@@ -26,7 +26,7 @@ public class TokenCacheServiceImpl implements TokenCacheService {
     @CircuitBreaker(name = "redisBreaker", fallbackMethod = "fallbackAllValidTokenCache")
     @Retry(name = "redisRetry", fallbackMethod = "fallbackAllValidTokenCache")
     public Optional<TokenEntity> getUserValidTokenFromCacheOrDB(Long userId) {
-        TokenEntity tokens = cacheUtil.getOrLoad(CacheConstraints.ALL_TOKEN_KEY.getKey(userId),
+        TokenEntity tokens = cacheUtil.getOrLoad(CacheConstraints.USER_TOKEN_KEY.getKey(userId),
                 () -> tokenRepository.findValidTokenByUser(userId).orElse(null),
                 CacheDurationConstraints.WEEK.toDuration());
         return Optional.ofNullable(tokens);
@@ -56,7 +56,7 @@ public class TokenCacheServiceImpl implements TokenCacheService {
     @CircuitBreaker(name = "redisBreaker", fallbackMethod = "fallbackClearUserValidTokenCache")
     @Retry(name = "redisRetry", fallbackMethod = "fallbackClearUserValidTokenCache")
     public void clearUserValidTokenCache(Long userId) {
-        cacheUtil.deleteFromCache(CacheConstraints.ALL_TOKEN_KEY.getKey(userId));
+        cacheUtil.deleteFromCache(CacheConstraints.USER_TOKEN_KEY.getKey(userId));
         log.debug("Cache cleared for userId {}",  userId);
     }
 

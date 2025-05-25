@@ -21,14 +21,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserEntity loadUserByUsername(String username) {
+        System.out.println("loadUserByUsername " + username);
         return cacheService.getUserFromCacheOrDB(username)
                 .orElseThrow(() -> new NotFoundException(ExceptionConstants.USER_NOT_FOUND.getMessage()));
     }
 
     @Override
     public UserPrincipal getUserForPrincipal(String username) {
+        System.out.println("getUserForPrincipal " + username);
         var userEntity = cacheService.getUserFromCacheOrDB(username)
                 .orElseThrow(() -> new NotFoundException(ExceptionConstants.USER_NOT_FOUND.getMessage()));
+        System.out.println("getUserForPrincipal roles " + userEntity.getRoles().stream().toList());
+
         return UserMapper.toUserPrincipal(userEntity);
     }
 

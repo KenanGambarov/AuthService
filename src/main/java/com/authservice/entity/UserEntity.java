@@ -45,7 +45,7 @@ public class UserEntity implements Serializable {
     @Column(nullable = false)
     private String address;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
