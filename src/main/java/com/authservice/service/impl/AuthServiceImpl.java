@@ -13,6 +13,7 @@ import com.authservice.exception.*;
 import com.authservice.mapper.AuthMapper;
 import com.authservice.mapper.TokenMapper;
 import com.authservice.mapper.UserMapper;
+import com.authservice.mapper.UserRoleMapper;
 import com.authservice.repository.RoleRepository;
 import com.authservice.security.UserPrincipal;
 import com.authservice.service.*;
@@ -37,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private final TokenService tokenService;
+    private final UserRoleService userRoleService;
     private final AuthenticationManager authenticationManager;
 
     @Override
@@ -51,8 +53,10 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new NotFoundException(ExceptionConstants.DEFAULT_ROLE_NOT_FOUND
                         .getMessagePattern(RoleName.USER)));
 
-        var user =  UserMapper.toEntity(request,passwordEncoder.encode(request.getPassword()),role);
-        userDetailsService.saveUserDetails(user);
+        var user =  UserMapper.toEntity(request,passwordEncoder.encode(request.getPassword()));
+        user = userDetailsService.saveUserDetails(user);
+
+        userRoleService.saveUserRoleDetails(UserRoleMapper.toEntity(role));
 
         var jwtToken = jwtService.generateToken(new UserPrincipal(request.getUsername(),request.getPassword(), List.of(role.getName())));
         var refreshToken = jwtService.generateRefreshToken(new UserPrincipal(request.getUsername(),request.getPassword(),List.of(role.getName())));
@@ -75,8 +79,8 @@ public class AuthServiceImpl implements AuthService {
 
             UserEntity userEntity = userDetailsService.loadUserByUsername(request.getUsername());
 //            System.out.println("userEntity " + userEntity);
-            var roles = userEntity.getRoles().stream().map(RoleEntity::getName).toList();
-            System.out.println("roles " + userEntity.getRoles());
+            var roles = UserMapper.entityToRoleList(userEntity);
+            System.out.println("roles " + userEntity.getUserRoles());
             UserPrincipal userPrincipal = new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),roles);
 
             String accessToken = jwtService.generateToken(userPrincipal);

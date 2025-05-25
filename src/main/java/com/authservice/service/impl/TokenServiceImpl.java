@@ -6,6 +6,7 @@ import com.authservice.entity.TokenEntity;
 import com.authservice.exception.ExceptionConstants;
 import com.authservice.exception.UnAuthorizedException;
 import com.authservice.mapper.TokenMapper;
+import com.authservice.mapper.UserMapper;
 import com.authservice.repository.TokenRepository;
 import com.authservice.security.UserPrincipal;
 import com.authservice.service.JwtService;
@@ -43,7 +44,7 @@ public class TokenServiceImpl implements TokenService {
                 new UnAuthorizedException(ExceptionConstants.INVALID_TOKEN.getMessage()));
 
         var userEntity = userDetailsService.loadUserByUsername(username);
-        var roles = userEntity.getRoles().stream().map(RoleEntity::getName).toList();
+        var roles = UserMapper.entityToRoleList(userEntity);
 
         UserPrincipal user = new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),roles);
 

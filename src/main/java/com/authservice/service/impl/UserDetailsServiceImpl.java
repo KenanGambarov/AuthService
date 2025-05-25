@@ -31,15 +31,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         System.out.println("getUserForPrincipal " + username);
         var userEntity = cacheService.getUserFromCacheOrDB(username)
                 .orElseThrow(() -> new NotFoundException(ExceptionConstants.USER_NOT_FOUND.getMessage()));
-        System.out.println("getUserForPrincipal roles " + userEntity.getRoles().stream().toList());
+        System.out.println("getUserForPrincipal roles " + UserMapper.entityToRoleList(userEntity));
 
         return UserMapper.toUserPrincipal(userEntity);
     }
 
 
     @Override
-    public void saveUserDetails(UserEntity user) {
-         userRepository.save(user);
+    public UserEntity saveUserDetails(UserEntity user) {
+         return userRepository.save(user);
     }
 
 

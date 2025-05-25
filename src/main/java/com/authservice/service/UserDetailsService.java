@@ -1,6 +1,5 @@
 package com.authservice.service;
 
-import com.authservice.dto.response.UserResponse;
 import com.authservice.entity.UserEntity;
 import com.authservice.security.UserPrincipal;
 
@@ -10,7 +9,7 @@ public interface UserDetailsService {
 
     UserPrincipal getUserForPrincipal(String username);
 
-    void saveUserDetails(UserEntity user);
+    UserEntity saveUserDetails(UserEntity user);
 
     void clearUserCache(String username);
 

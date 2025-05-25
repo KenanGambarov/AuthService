@@ -14,6 +14,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByUsername(String username);
 
     @EntityGraph(attributePaths = {"roles"})
+    @Query("SELECT u FROM UserEntity u WHERE u.username = :username")
     Optional<UserEntity> findByUsername(String username);
 
  }
