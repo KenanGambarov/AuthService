@@ -1,6 +1,5 @@
 package com.authservice.service.impl;
 
-import com.authservice.dto.enums.RoleName;
 import com.authservice.entity.UserRoleEntity;
 import com.authservice.repository.UserRoleRepository;
 import com.authservice.service.UserRoleService;
@@ -14,7 +13,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     private final UserRoleRepository roleRepository;
 
     @Override
-    public UserRoleEntity saveUserRoleDetails(UserRoleEntity userRoleEntity) {
-        return roleRepository.save(userRoleEntity);
+    public void saveUserRoleDetails(UserRoleEntity userRoleEntity) {
+        roleRepository.save(userRoleEntity);
     }
 }

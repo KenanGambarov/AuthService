@@ -6,7 +6,6 @@ import com.authservice.dto.request.LoginRequest;
 import com.authservice.dto.request.UserRequest;
 import com.authservice.dto.response.AuthResponse;
 import com.authservice.dto.response.TokenResponse;
-import com.authservice.entity.RoleEntity;
 import com.authservice.entity.TokenEntity;
 import com.authservice.entity.UserEntity;
 import com.authservice.exception.*;
@@ -56,10 +55,10 @@ public class AuthServiceImpl implements AuthService {
         var user =  UserMapper.toEntity(request,passwordEncoder.encode(request.getPassword()));
         user = userDetailsService.saveUserDetails(user);
 
-        userRoleService.saveUserRoleDetails(UserRoleMapper.toEntity(role));
+        userRoleService.saveUserRoleDetails(UserRoleMapper.toEntity(user,role));
 
-        var jwtToken = jwtService.generateToken(new UserPrincipal(request.getUsername(),request.getPassword(), List.of(role.getName())));
-        var refreshToken = jwtService.generateRefreshToken(new UserPrincipal(request.getUsername(),request.getPassword(),List.of(role.getName())));
+        var jwtToken = jwtService.generateToken(new UserPrincipal(user.getId(),request.getUsername(),request.getPassword(), List.of(role.getName())));
+        var refreshToken = jwtService.generateRefreshToken(new UserPrincipal(user.getId(),request.getUsername(),request.getPassword(),List.of(role.getName())));
 
         saveUserToken(user, refreshToken);
 
@@ -80,8 +79,8 @@ public class AuthServiceImpl implements AuthService {
             UserEntity userEntity = userDetailsService.loadUserByUsername(request.getUsername());
 //            System.out.println("userEntity " + userEntity);
             var roles = UserMapper.entityToRoleList(userEntity);
-            System.out.println("roles " + userEntity.getUserRoles());
-            UserPrincipal userPrincipal = new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),roles);
+            System.out.println("roles " + roles);
+            UserPrincipal userPrincipal = new UserPrincipal(userEntity.getId(),userEntity.getUsername(),userEntity.getPassword(),roles);
 
             String accessToken = jwtService.generateToken(userPrincipal);
             String refreshToken = jwtService.generateRefreshToken(userPrincipal);

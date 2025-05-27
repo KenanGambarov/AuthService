@@ -5,10 +5,10 @@ import com.authservice.dto.request.UserRequest;
 import com.authservice.dto.response.UserResponse;
 import com.authservice.entity.RoleEntity;
 import com.authservice.entity.UserEntity;
+import com.authservice.entity.UserRoleEntity;
 import com.authservice.security.UserPrincipal;
 
 import java.util.List;
-import java.util.Set;
 
 public class UserMapper {
 
@@ -35,11 +35,11 @@ public class UserMapper {
     }
 
     public static UserPrincipal toUserPrincipal(UserEntity userEntity) {
-        return new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),entityToRoleList(userEntity));
+        return new UserPrincipal(userEntity.getId(),userEntity.getUsername(),userEntity.getPassword(),entityToRoleList(userEntity));
     }
 
     public static List<RoleName> entityToRoleList(UserEntity userEntity){
-        return userEntity.getUserRoles().stream().map(e-> e.getRole()).toList()
+        return userEntity.getUserRoles().stream().map(UserRoleEntity::getRole).toList()
                 .stream().map(RoleEntity::getName).toList();
     }
 

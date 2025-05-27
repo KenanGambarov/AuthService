@@ -28,6 +28,7 @@ public class TokenMapper {
                 .setSubject(user.getUsername())
                 .setIssuedAt(isuedDate)
                 .setExpiration(expDdate)
+                .claim("userId", user.getUserId())
                 .claim("userName", user.getUsername())
                 .claim("roles", user.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)

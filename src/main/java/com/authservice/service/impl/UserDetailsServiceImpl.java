@@ -31,8 +31,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         System.out.println("getUserForPrincipal " + username);
         var userEntity = cacheService.getUserFromCacheOrDB(username)
                 .orElseThrow(() -> new NotFoundException(ExceptionConstants.USER_NOT_FOUND.getMessage()));
-        System.out.println("getUserForPrincipal roles " + UserMapper.entityToRoleList(userEntity));
-
         return UserMapper.toUserPrincipal(userEntity);
     }
 

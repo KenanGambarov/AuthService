@@ -27,8 +27,7 @@ public class UserDetailsCacheServiceImpl implements UserDetailsCacheService {
     @Retry(name = "redisRetry", fallbackMethod = "fallbackUserCache")
     public Optional<UserEntity> getUserFromCacheOrDB(String username) {
         UserEntity user = cacheUtil.getOrLoad(CacheConstraints.USER_KEY.getKey(username),
-                () -> {System.out.println("getUserFromCacheOrDB cache " + username);
-            return userRepository.findByUsername(username).orElse(null);},
+                () -> userRepository.findByUsername(username).orElse(null),
                 CacheDurationConstraints.DAY.toDuration());
         return Optional.ofNullable(user);
     }

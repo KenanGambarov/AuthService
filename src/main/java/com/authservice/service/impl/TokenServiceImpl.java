@@ -1,7 +1,6 @@
 package com.authservice.service.impl;
 
 import com.authservice.dto.response.TokenResponse;
-import com.authservice.entity.RoleEntity;
 import com.authservice.entity.TokenEntity;
 import com.authservice.exception.ExceptionConstants;
 import com.authservice.exception.UnAuthorizedException;
@@ -46,7 +45,7 @@ public class TokenServiceImpl implements TokenService {
         var userEntity = userDetailsService.loadUserByUsername(username);
         var roles = UserMapper.entityToRoleList(userEntity);
 
-        UserPrincipal user = new UserPrincipal(userEntity.getUsername(),userEntity.getPassword(),roles);
+        UserPrincipal user = new UserPrincipal(userEntity.getId(),userEntity.getUsername(),userEntity.getPassword(),roles);
 
         if (!jwtService.isTokenValid(refreshToken, user)) {
             throw new UnAuthorizedException(ExceptionConstants.INVALID_TOKEN.getMessage());

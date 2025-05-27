@@ -1,6 +1,7 @@
 package com.authservice.security;
 
 import com.authservice.dto.enums.RoleName;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,11 +13,14 @@ import java.util.stream.Collectors;
 
 public class UserPrincipal implements UserDetails {
 
+    @Getter
+    private final Long userId;
     private final String userName;
     private final String password;
     private final List<RoleName> roles;
 
-    public UserPrincipal(String userName, String password,List<RoleName> roles) {
+    public UserPrincipal(Long userId,String userName, String password,List<RoleName> roles) {
+        this.userId = userId;
         this.userName = userName;
         this.password = password;
         this.roles = roles;
